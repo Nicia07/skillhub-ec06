@@ -1,0 +1,93 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-skillhub_ec06}
+      MYSQL_USER: ${DB_USERNAME:-skillhub}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-skillhub}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_ROOT_PASSWORD:-root}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [skillhub-net]
+
+  sso-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SSO_DB_NAME:-skillhub_sso}
+      POSTGRES_USER: ${SSO_DB_USER:-skillhub_sso}
+      POSTGRES_PASSWORD: ${SSO_DB_PASSWORD:-skillhub_sso}
+    volumes:
+      - sso_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SSO_DB_USER:-skillhub_sso}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [skillhub-net]
+
+  skillhub-sso:
+    build:
+      context: ./skillhub-sso
+    restart: unless-stopped
+    depends_on:
+      sso-db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SSO_DB_HOST: sso-db
+      SSO_DB_PORT: 5432
+      SSO_DB_NAME: ${SSO_DB_NAME:-skillhub_sso}
+      SSO_DB_USER: ${SSO_DB_USER:-skillhub_sso}
+      SSO_DB_PASSWORD: ${SSO_DB_PASSWORD:-skillhub_sso}
+      SSO_MASTER_KEY: ${SSO_MASTER_KEY:-change-me-master-key}
+      SSO_JWT_SECRET: ${SSO_JWT_SECRET:-change-me-please-use-a-32-bytes-minimum-secret}
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health | grep -q UP || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    networks: [skillhub-net]
+
+  laravel:
+    build:
+      context: ./skillhub-back
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      skillhub-sso:
+        condition: service_started
+    environment:
+      APP_ENV: production
+      APP_KEY: ${APP_KEY:-}
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-skillhub_ec06}
+      DB_USERNAME: ${DB_USERNAME:-skillhub}
+      DB_PASSWORD: ${DB_PASSWORD:-skillhub}
+      JWT_SECRET: ${JWT_SECRET:-}
+      SSO_BASE_URL: http://skillhub-sso:8081
+      SSO_MASTER_KEY: ${SSO_MASTER_KEY:-change-me-master-key}
+    ports:
+      - "8000:80"
+    networks: [skillhub-net]
+
+networks:
+  skillhub-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  sso_db_data:
