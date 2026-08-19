@@ -18,7 +18,7 @@ SonarCloud.
 ┌────────────────────────────────────────────────────────────┐
 │                    Backend Laravel (skillhub-back)           │
 │  - Catalogue de formations, inscriptions, signalements       │
-│  - Auth "métier" existante : JWT interne (Tymon JWTAuth)      │
+│  - /api/register, /api/login : identifiants verifies par le SSO│
 │  - Auth forte SSO : POST /api/sso/login, GET /api/sso/profile │
 └───────────┬───────────────────────────────────┬──────────────┘
             │ MySQL (skillhub_ec06)              │ API REST (X-Master-Key,
@@ -56,26 +56,41 @@ connu uniquement des clients de confiance (ici, le backend Laravel). C'est la
 couche d'**authentification forte** : sans Master Key valide, la requête est
 rejetée (403) avant même que le mot de passe utilisateur soit vérifié.
 
-**Intégration côté Laravel :**
+Le microservice `skillhub-sso` expose en plus `POST /api/auth/register`
+(même protection Master Key), qui crée le compte credential (mot de passe
+hashé en BCrypt côté SSO) et renvoie un JWT ; **409** si l'email existe déjà.
 
-1. `POST /api/sso/login` (`SsoAuthController`) reçoit `email`/`password` du
-   client, ajoute le header `X-Master-Key` (lu depuis `services.sso.master_key`,
-   jamais exposé au client) et relaie la requête au microservice. Le JWT reçu
-   est retourné tel quel au client.
-2. Le client renvoie ensuite ce JWT dans `Authorization: Bearer <token>` sur
-   les requêtes suivantes.
-3. `GET /api/sso/profile` est protégée par le middleware `sso`
-   (`App\Http\Middleware\SsoAuthenticate`, alias `sso` dans `bootstrap/app.php`) :
-   il appelle `GET /api/auth/validate` sur le microservice à chaque requête.
-   Si le microservice répond `valid: true`, la requête continue ; sinon, 401.
+**Intégration côté Laravel — deux niveaux :**
 
-Flux complet : `POST /api/sso/login` → JWT → `GET /api/sso/profile` avec
-`Authorization: Bearer <token>` → 200.
+1. **L'écran de connexion/inscription réel de React** (`AuthModal.jsx`)
+   continue d'appeler `POST /api/register` et `POST /api/login` sur Laravel
+   sans aucun changement côté frontend. En interne, `AuthController` ne
+   vérifie plus rien localement :
+   - `register()` appelle d'abord `POST /api/auth/register` sur le SSO
+     (Master Key + email/password/role). Ce n'est **qu'en cas de succès**
+     que Laravel crée la ligne `users` locale (données métier : rôle,
+     pseudo, clés étrangères formations/inscriptions/signalements). Si le
+     SSO refuse (409) ou est injoignable (503), aucun utilisateur Laravel
+     n'est créé.
+   - `login()` appelle `POST /api/auth/login` sur le SSO pour valider les
+     identifiants (`JWTAuth::attempt` local a été supprimé). Si le SSO
+     confirme, Laravel retrouve l'utilisateur local par email et émet son
+     propre JWT (Tymon) — pour ne rien casser des routes déjà protégées
+     par ce système (formations, inscriptions, signalements).
+   - Résultat : le mot de passe n'est **jamais vérifié par Laravel** — la
+     preuve d'identité vient entièrement du microservice.
+2. **Route de démonstration dédiée**, en plus du flux ci-dessus :
+   `POST /api/sso/login` (`SsoAuthController`) relaie directement le JWT
+   émis par le SSO, et `GET /api/sso/profile` (middleware `sso` →
+   `App\Http\Middleware\SsoAuthenticate`) valide ce JWT à chaque requête en
+   appelant `GET /api/auth/validate` sur le microservice — flux complet :
+   `POST /api/sso/login` → JWT → `GET /api/sso/profile` avec
+   `Authorization: Bearer <token>` → 200.
 
-*(Cette route SSO est un ajout démonstratif à côté de l'authentification JWT
-interne existante — utilisée par le catalogue de formations, les inscriptions,
-etc. — qui reste inchangée pour ne pas casser les fonctionnalités déjà
-livrées.)*
+> ⚠️ En développement local hors Docker, utiliser `SSO_BASE_URL=http://127.0.0.1:8081`
+> et non `http://localhost:8081` : sur certaines machines Windows, la résolution
+> IPv6 (`::1`) de `localhost` n'aboutit pas et fait attendre le timeout complet
+> (5s) avant l'échec — voir `skillhub-back/.env.example`.
 
 ## 3. Règle métier : limite de 5 inscriptions actives
 
