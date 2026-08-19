@@ -23,6 +23,11 @@ public class ApiExceptionHandler {
         return body(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<Object> handleEmailAlreadyExists(EmailAlreadyExistsException ex) {
+        return body(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<Object> handleJwtException(JwtException ex) {
         return body(HttpStatus.UNAUTHORIZED, "Token JWT invalide ou expire");

@@ -2,7 +2,9 @@ package com.skillhub.sso.service;
 
 import com.skillhub.sso.dto.LoginRequest;
 import com.skillhub.sso.dto.LoginResponse;
+import com.skillhub.sso.dto.RegisterRequest;
 import com.skillhub.sso.dto.ValidateResponse;
+import com.skillhub.sso.exception.EmailAlreadyExistsException;
 import com.skillhub.sso.exception.InvalidCredentialsException;
 import com.skillhub.sso.exception.InvalidMasterKeyException;
 import com.skillhub.sso.model.SsoUser;
@@ -48,6 +50,32 @@ public class AuthService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new InvalidCredentialsException("Identifiants invalides");
         }
+
+        String token = jwtService.generateToken(user.getEmail(), user.getRole());
+        return new LoginResponse(token, jwtService.getExpirationMs(), user.getEmail(), user.getRole());
+    }
+
+    /**
+     * Creation d'un utilisateur SSO. Reservee aux appelants de confiance
+     * (Master Key) : c'est Laravel qui appelle cette route lors de
+     * l'inscription d'un apprenant/formateur, pour que le microservice
+     * devienne la source de verite des identifiants.
+     */
+    public LoginResponse register(RegisterRequest request, String providedMasterKey) {
+        if (providedMasterKey == null || !providedMasterKey.equals(masterKey)) {
+            throw new InvalidMasterKeyException("Master Key manquante ou invalide");
+        }
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("Un compte existe deja avec cet email");
+        }
+
+        SsoUser user = userRepository.save(new SsoUser(
+                null,
+                request.getEmail(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getRole()
+        ));
 
         String token = jwtService.generateToken(user.getEmail(), user.getRole());
         return new LoginResponse(token, jwtService.getExpirationMs(), user.getEmail(), user.getRole());

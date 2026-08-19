@@ -2,6 +2,7 @@ package com.skillhub.sso;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.skillhub.sso.dto.LoginRequest;
+import com.skillhub.sso.dto.RegisterRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -73,6 +74,39 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.role").value("formateur"));
+    }
+
+    @Test
+    void register_cree_un_utilisateur_et_retourne_un_jwt() throws Exception {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("nouveau@skillhub.test");
+        request.setPassword("MotDePasse123!");
+        request.setRole("apprenant");
+
+        mockMvc.perform(post("/api/auth/register")
+                        .header("X-Master-Key", MASTER_KEY)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.email").value("nouveau@skillhub.test"));
+    }
+
+    @Test
+    void register_avec_un_email_deja_utilise_est_refuse_avec_409() throws Exception {
+        userRepository.save(new SsoUser(null, "existe@skillhub.test",
+                passwordEncoder.encode("Existe123!"), "apprenant"));
+
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("existe@skillhub.test");
+        request.setPassword("AutreMotDePasse123!");
+        request.setRole("apprenant");
+
+        mockMvc.perform(post("/api/auth/register")
+                        .header("X-Master-Key", MASTER_KEY)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
     }
 
     @Test

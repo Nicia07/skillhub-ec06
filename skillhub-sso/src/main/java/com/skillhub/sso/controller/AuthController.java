@@ -2,6 +2,7 @@ package com.skillhub.sso.controller;
 
 import com.skillhub.sso.dto.LoginRequest;
 import com.skillhub.sso.dto.LoginResponse;
+import com.skillhub.sso.dto.RegisterRequest;
 import com.skillhub.sso.dto.ValidateResponse;
 import com.skillhub.sso.exception.InvalidCredentialsException;
 import com.skillhub.sso.service.AuthService;
@@ -26,6 +27,13 @@ public class AuthController {
                                                 @RequestHeader(value = MASTER_KEY_HEADER, required = false) String masterKey) {
         LoginResponse response = authService.login(request, masterKey);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request,
+                                                   @RequestHeader(value = MASTER_KEY_HEADER, required = false) String masterKey) {
+        LoginResponse response = authService.register(request, masterKey);
+        return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping("/validate")
