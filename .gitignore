@@ -29,6 +29,7 @@ Skillhub/.env
 skillhub-sso/target/
 skillhub-sso/.mvn/wrapper/maven-wrapper.jar
 skillhub-sso/*.log
+skillhub-sso/data/
 
 # IDE / OS
 .idea/

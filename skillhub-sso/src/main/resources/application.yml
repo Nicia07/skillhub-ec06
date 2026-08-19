@@ -1,0 +1,60 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: skillhub-sso
+  profiles:
+    active: local
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+# Parametres de securite du microservice SSO.
+# - master-key : cle partagee que seuls des clients de confiance (ex: backend Laravel)
+#   doivent connaitre pour appeler /api/auth/login. C'est la couche "authentification forte"
+#   en plus du couple identifiant/mot de passe de l'utilisateur.
+# - jwt.secret : cle de signature HMAC des tokens JWT emis par ce microservice.
+# - jwt.expiration-ms : duree de validite d'un token, en millisecondes.
+sso:
+  master-key: ${SSO_MASTER_KEY:change-me-master-key}
+  jwt:
+    secret: ${SSO_JWT_SECRET:change-me-please-use-a-32-bytes-minimum-secret}
+    expiration-ms: ${SSO_JWT_EXPIRATION_MS:3600000}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:file:./data/skillhub-sso;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  datasource:
+    url: jdbc:postgresql://${SSO_DB_HOST:sso-db}:${SSO_DB_PORT:5432}/${SSO_DB_NAME:skillhub_sso}
+    driver-class-name: org.postgresql.Driver
+    username: ${SSO_DB_USER:skillhub_sso}
+    password: ${SSO_DB_PASSWORD:skillhub_sso}
