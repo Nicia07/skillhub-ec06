@@ -15,7 +15,7 @@ class InscriptionLimiteTest extends TestCase
     private function creerFormation(User $formateur): Formation
     {
         return Formation::create([
-            'title' => 'Formation ' . uniqid(),
+            'title' => 'Formation '.uniqid(),
             'description' => 'Description de test',
             'price' => 100,
             'duration' => 10,
@@ -50,7 +50,7 @@ class InscriptionLimiteTest extends TestCase
         $sixiemeFormation = $this->creerFormation($formateur);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/inscriptions', [
             'id_formation' => $sixiemeFormation->id,
         ]);
@@ -91,7 +91,7 @@ class InscriptionLimiteTest extends TestCase
         $nouvelleFormation = $this->creerFormation($formateur);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/inscriptions', [
             'id_formation' => $nouvelleFormation->id,
         ]);

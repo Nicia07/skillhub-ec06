@@ -17,6 +17,7 @@ class InscriptionController extends Controller
                 $inscription->formation->pseudo_formateur = $inscription->formation->formateur->pseudo ?? null;
                 $inscription->formation->unsetRelation('formateur');
             }
+
             return $inscription;
         });
     }
@@ -57,7 +58,7 @@ class InscriptionController extends Controller
 
         if ($inscriptionsActives >= self::MAX_INSCRIPTIONS_ACTIVES) {
             return response()->json([
-                'message' => 'Limite atteinte : vous ne pouvez pas suivre plus de ' . self::MAX_INSCRIPTIONS_ACTIVES . ' formations en même temps. Terminez ou désinscrivez-vous d\'une formation avant d\'en suivre une nouvelle.',
+                'message' => 'Limite atteinte : vous ne pouvez pas suivre plus de '.self::MAX_INSCRIPTIONS_ACTIVES.' formations en même temps. Terminez ou désinscrivez-vous d\'une formation avant d\'en suivre une nouvelle.',
             ], 400);
         }
 
@@ -77,7 +78,7 @@ class InscriptionController extends Controller
     {
         $inscription = Inscription::find($id);
 
-        if (!$inscription) {
+        if (! $inscription) {
             return response()->json(['message' => 'Inscription introuvable'], 404);
         }
 
@@ -99,7 +100,7 @@ class InscriptionController extends Controller
     {
         $inscription = Inscription::find($id);
 
-        if (!$inscription) {
+        if (! $inscription) {
             return response()->json(['message' => 'Inscription introuvable'], 404);
         }
 
