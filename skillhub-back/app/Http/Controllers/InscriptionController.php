@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 
 class InscriptionController extends Controller
 {
+    // Un apprenant ne peut pas suivre plus de 5 formations en même temps.
+    private const MAX_INSCRIPTIONS_ACTIVES = 5;
+
     private function withFormation($inscriptions)
     {
         return $inscriptions->map(function ($inscription) {
@@ -46,6 +49,16 @@ class InscriptionController extends Controller
 
         if ($exists) {
             return response()->json(['message' => 'Vous suivez déjà cette formation'], 409);
+        }
+
+        $inscriptionsActives = Inscription::where('id_apprenant', auth()->id())
+            ->where('status', 'en cours')
+            ->count();
+
+        if ($inscriptionsActives >= self::MAX_INSCRIPTIONS_ACTIVES) {
+            return response()->json([
+                'message' => 'Limite atteinte : vous ne pouvez pas suivre plus de ' . self::MAX_INSCRIPTIONS_ACTIVES . ' formations en même temps. Terminez ou désinscrivez-vous d\'une formation avant d\'en suivre une nouvelle.',
+            ], 400);
         }
 
         $inscription = Inscription::create([
