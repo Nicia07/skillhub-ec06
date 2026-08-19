@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'jwt.verify' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
             'role' => \App\Http\Middleware\EnsureRole::class,
+            'sso' => \App\Http\Middleware\SsoAuthenticate::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

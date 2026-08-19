@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    // Microservice Spring Boot d'authentification forte (SSO + Master Key).
+    'sso' => [
+        'base_url' => env('SSO_BASE_URL', 'http://localhost:8081'),
+        'master_key' => env('SSO_MASTER_KEY', 'change-me-master-key'),
+        'timeout' => env('SSO_TIMEOUT', 5),
+    ],
+
 ];

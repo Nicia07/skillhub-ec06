@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\SignalementController;
+use App\Http\Controllers\SsoAuthController;
+use App\Http\Controllers\SsoProfileController;
 use Tymon\JWTAuth\Http\Middleware\Authenticate;
 
 // ==========================================
@@ -16,6 +18,12 @@ Route::post('/register', [AuthController::class, 'register']);
 // Catalogue public : visible par tous, connectés ou non.
 Route::get('/formations', [FormationController::class, 'index']);
 Route::get('/formations/{id}', [FormationController::class, 'show']);
+
+// --- AUTHENTIFICATION FORTE DÉLÉGUÉE AU MICROSERVICE SPRING BOOT SSO ---
+// Login : Laravel présente la Master Key au microservice et relaie le JWT émis.
+Route::post('/sso/login', [SsoAuthController::class, 'login']);
+// Route protégée : n'autorise l'accès que si le microservice SSO valide le token.
+Route::get('/sso/profile', [SsoProfileController::class, 'show'])->middleware('sso');
 
 // ==========================================
 // 2. ROUTES PROTÉGÉES (Nécessitent le Token)
