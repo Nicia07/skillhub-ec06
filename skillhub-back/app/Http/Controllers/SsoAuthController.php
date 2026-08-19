@@ -25,7 +25,7 @@ class SsoAuthController extends Controller
             $response = Http::withHeaders([
                 'X-Master-Key' => config('services.sso.master_key'),
             ])->timeout(config('services.sso.timeout'))
-                ->post(rtrim(config('services.sso.base_url'), '/') . '/api/auth/login', $validated);
+                ->post(rtrim(config('services.sso.base_url'), '/').'/api/auth/login', $validated);
         } catch (ConnectionException $e) {
             return response()->json(['message' => 'Microservice SSO indisponible'], 503);
         }

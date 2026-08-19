@@ -13,10 +13,10 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'pseudo'   => 'required|string|max:50',
-            'email'    => 'required|string|email|max:191|unique:users',
+            'pseudo' => 'required|string|max:50',
+            'email' => 'required|string|email|max:191|unique:users',
             'password' => 'required|string|min:6',
-            'role'     => 'required|string|in:apprenant,formateur',
+            'role' => 'required|string|in:apprenant,formateur',
         ]);
 
         if ($validator->fails()) {
@@ -24,13 +24,14 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'pseudo'   => $request->pseudo,
-            'email'    => $request->email,
+            'pseudo' => $request->pseudo,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => $request->role,
+            'role' => $request->role,
         ]);
 
         $token = JWTAuth::fromUser($user);
+
         return response()->json(compact('user', 'token'), 201);
     }
 
@@ -38,7 +39,7 @@ class AuthController extends Controller
     {
         $credentials = $request->only('email', 'password');
 
-        if (!$token = JWTAuth::attempt($credentials)) {
+        if (! $token = JWTAuth::attempt($credentials)) {
             return response()->json(['error' => 'Identifiants invalides'], 401);
         }
 
@@ -48,6 +49,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         auth()->logout();
+
         return response()->json(['message' => 'Déconnexion réussie']);
     }
 

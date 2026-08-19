@@ -25,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // by inspecting the wrapped previous exception, since the middleware sets it only
         // when a JWTException (invalid/expired token) was actually caught.
         $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException $e, $request) {
-            if (!$request->is('api/*')) {
+            if (! $request->is('api/*')) {
                 return null;
             }
 

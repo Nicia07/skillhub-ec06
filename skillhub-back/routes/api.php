@@ -1,12 +1,12 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\InscriptionController;
 use App\Http\Controllers\SignalementController;
 use App\Http\Controllers\SsoAuthController;
 use App\Http\Controllers\SsoProfileController;
+use Illuminate\Support\Facades\Route;
 use Tymon\JWTAuth\Http\Middleware\Authenticate;
 
 // ==========================================

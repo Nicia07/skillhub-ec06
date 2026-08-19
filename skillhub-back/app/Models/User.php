@@ -11,10 +11,12 @@ class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
     public $timestamps = false;
 
     /**
      * Les attributs qui peuvent être remplis massivement (Mass Assignment).
+     *
      * @var array<string>
      */
     protected $fillable = [
@@ -26,6 +28,7 @@ class User extends Authenticatable implements JWTSubject
 
     /**
      * Les attributs à cacher lors de la conversion en JSON (Sécurité).
+     *
      * @var array<string>
      */
     protected $hidden = [
@@ -35,13 +38,14 @@ class User extends Authenticatable implements JWTSubject
 
     /**
      * Casting des attributs (Types de données).
+     *
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed', 
+            'password' => 'hashed',
         ];
     }
 

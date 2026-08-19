@@ -60,7 +60,7 @@ class SignalementTest extends TestCase
         $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($apprenant);
 
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson("/api/formations/{$formation->id}/signalements", [
             'motif' => 'erreur_technique',
             'description' => 'le module 2 affiche une erreur 500 lors du chargement.',
@@ -93,14 +93,14 @@ class SignalementTest extends TestCase
 
         // Premier signalement : doit réussir.
         $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson("/api/formations/{$formation->id}/signalements", [
             'motif' => 'contenu_inapproprie',
         ])->assertStatus(201);
 
         // Second signalement, même formation, même utilisateur : doit échouer.
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson("/api/formations/{$formation->id}/signalements", [
             'motif' => 'autre',
         ]);

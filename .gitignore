@@ -31,7 +31,8 @@ skillhub-sso/.mvn/wrapper/maven-wrapper.jar
 skillhub-sso/*.log
 skillhub-sso/data/
 
-# IDE / OS
+# IDE / OS / tooling
+.claude/
 .idea/
 .vscode/
 *.iml

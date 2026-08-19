@@ -18,7 +18,7 @@ class SsoAuthenticate
     {
         $authorization = $request->header('Authorization');
 
-        if (!$authorization || !str_starts_with($authorization, 'Bearer ')) {
+        if (! $authorization || ! str_starts_with($authorization, 'Bearer ')) {
             return response()->json(['message' => 'Token SSO absent'], 401);
         }
 
@@ -26,12 +26,12 @@ class SsoAuthenticate
             $response = Http::withHeaders([
                 'Authorization' => $authorization,
             ])->timeout(config('services.sso.timeout'))
-                ->get(rtrim(config('services.sso.base_url'), '/') . '/api/auth/validate');
+                ->get(rtrim(config('services.sso.base_url'), '/').'/api/auth/validate');
         } catch (ConnectionException $e) {
             return response()->json(['message' => 'Microservice SSO indisponible'], 503);
         }
 
-        if ($response->failed() || !($response->json('valid'))) {
+        if ($response->failed() || ! ($response->json('valid'))) {
             return response()->json(['message' => 'Token SSO invalide ou expire'], 401);
         }
 

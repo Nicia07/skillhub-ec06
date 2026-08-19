@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class FormationTest extends TestCase
 {
-    // RefreshDatabase ordonne à Laravel d'exécuter toutes tes migrations 
+    // RefreshDatabase ordonne à Laravel d'exécuter toutes tes migrations
     // dans une base de données temporaire en mémoire avant de lancer les tests.
     use RefreshDatabase;
 
@@ -56,7 +56,7 @@ class FormationTest extends TestCase
 
         // On envoie la requête AVEC le token dans l'en-tête
         $response = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ])->postJson('/api/formations', $payload);
 
         // On affirme que la création a réussi (201 Created)
@@ -65,7 +65,7 @@ class FormationTest extends TestCase
         // Vérification: que Laravel l'a bien inséré dans la base de données
         $this->assertDatabaseHas('formations', [
             'title' => 'Formation React Avancé',
-            'user_id' => $formateur->id
+            'user_id' => $formateur->id,
         ]);
     }
 
