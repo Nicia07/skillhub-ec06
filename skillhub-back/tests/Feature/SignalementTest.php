@@ -6,6 +6,7 @@ use App\Models\Formation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SignalementTest extends TestCase
 {
@@ -57,7 +58,7 @@ class SignalementTest extends TestCase
             'email' => 'apprenant.signalement@test.com',
         ]);
 
-        $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($apprenant);
+        $token = JWTAuth::fromUser($apprenant);
 
         $response = $this->withHeaders([
             'Authorization' => 'Bearer '.$token,
@@ -89,7 +90,7 @@ class SignalementTest extends TestCase
             'email' => 'apprenant.recidive@test.com',
         ]);
 
-        $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($apprenant);
+        $token = JWTAuth::fromUser($apprenant);
 
         // Premier signalement : doit réussir.
         $this->withHeaders([

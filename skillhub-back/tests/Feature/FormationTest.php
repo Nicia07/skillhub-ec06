@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class FormationTest extends TestCase
 {
@@ -41,7 +42,7 @@ class FormationTest extends TestCase
         ]);
 
         // On génère un vrai token JWT pour cet utilisateur
-        $token = \Tymon\JWTAuth\Facades\JWTAuth::fromUser($formateur);
+        $token = JWTAuth::fromUser($formateur);
 
         // On prépare un faux formulaire complet
         $payload = [
