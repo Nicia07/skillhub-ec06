@@ -1,0 +1,178 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+.DashboardFormateur{
+    padding: 0 20px;
+}
+.pageFormateur {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.bloc-droite {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.bloc-droite h2 {
+    margin-bottom: 20px;
+}
+/*barre de recherche-filtre*/
+.search_filter{
+    width: 100%;
+    min-height: 100px;
+    display: flex;
+}
+
+.search{
+    background-color: blue;
+}
+
+.inputSearch{
+    display: flex;
+    gap: 2px;
+    height: 28px;
+    position: absolute;
+    right: 0;
+}
+
+.inputSearch button{
+    width: 50px;
+    background-color: blue;
+    font-family: Arial, Helvetica, sans-serif;
+    border-radius: 10%;
+    color: white;
+}
+
+.boxSearch{
+    display: flex;
+}
+
+.filter_symbol{
+  font-size: 22px;
+  color: blue;
+  display: flex;
+  align-items: center;
+}
+
+.search_symbol{
+  font-size: 35px;
+  color: blue;
+  display: flex;
+  align-items: center;
+}
+
+.filter{
+    margin-top: 25px;
+    padding: 5px;
+    width: 400px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 0 2px rgb(141, 64, 64);
+    border-radius: 5px;
+    background-color: rgb(134, 134, 205);
+}
+
+.filter ul{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.filter li{
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/*Card*/
+.boutonCard{
+    height: 35px;
+    width: 420px;
+    padding-top: 8px;
+    display: flex;
+    gap: 325px;
+    align-items: center;
+    justify-content: center;
+}
+
+.material-symbols-outlined{
+    height: 35px;
+    width: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+h2{
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+.CardsFormateur {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 50px;
+    justify-content: flex-start; 
+}
+
+.cardF{
+    box-shadow: 0 0 2px black;
+    display: flex;
+    width: 420px;
+    height: 295px;
+    border-radius: 7%;
+    flex-wrap: wrap;
+    background-color: white;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+img{
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 10px 5px 20px;
+}
+
+.container{
+    width: 243px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.info ul{
+    list-style: none;
+    width: 400px;
+    height: 100px;
+    background-color: rgb(232, 235, 235);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-left: 20px;
+    font-size: 13px;
+}
+
+.info li{
+    display: flex;
+    flex-direction: column;
+}
+
+.prix-tag {
+    font-weight: bold;
+    color: #2ecc71;
+    margin-top: 5px;
+    font-size: 1.1rem;
+}

@@ -1,0 +1,381 @@
+openapi: "3.0.3"
+info:
+  title: API SkillHub
+  description: >
+    Documentation complète de l'API REST pour la plateforme SkillHub.
+    L'API gère l'authentification JWT, le catalogue public des formations,
+    la gestion des formations par un formateur et le suivi des formations
+    par un apprenant.
+  version: 1.1.0
+servers:
+  - url: http://localhost:8000
+    description: Serveur Laravel Local
+
+paths:
+  /api/formations:
+    get:
+      summary: Récupérer le catalogue complet (Public)
+      description: Renvoie toutes les formations disponibles sur la plateforme, sans authentification requise.
+      tags:
+        - Formations
+      responses:
+        '200':
+          description: Liste des formations récupérée avec succès
+          content:
+            application/json:
+              example:
+                - id: 1
+                  title: "Développement React de Zéro à Héros"
+                  description: "Apprenez à créer des interfaces web modernes avec React."
+                  price: 1500.00
+                  duration: 60
+                  level: "beginner"
+                  categorie: "Front-end"
+                  ville: "En ligne"
+                  user_id: 2
+                  created_at: "2026-03-06T10:00:00.000000Z"
+                  updated_at: "2026-03-06T10:00:00.000000Z"
+                  pseudo_formateur: "MohamedFormateur"
+
+    post:
+      summary: Créer une nouvelle formation
+      description: >
+        Ajoute une formation en base de données. Le `user_id` n'est jamais envoyé par le
+        client : il est déduit du token JWT côté serveur. Réservé aux comptes de rôle `formateur`.
+      tags:
+        - Formations
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormationInput'
+            example:
+              title: "Maîtriser Laravel 11"
+              description: "Création d'API REST robustes avec TDD."
+              price: 500.00
+              duration: 20
+              level: "intermediate"
+              categorie: "Back-end"
+              ville: "Paris"
+      responses:
+        '201':
+          description: Formation créée avec succès
+          content:
+            application/json:
+              example:
+                message: "Formation créée avec succès"
+                formation:
+                  id: 5
+                  title: "Maîtriser Laravel 11"
+                  description: "Création d'API REST robustes avec TDD."
+                  price: 500.00
+                  duration: 20
+                  level: "intermediate"
+                  categorie: "Back-end"
+                  ville: "Paris"
+                  user_id: 2
+        '401':
+          description: Token JWT absent.
+          content:
+            application/json:
+              example:
+                message: "Token absent"
+        '403':
+          description: Token JWT présent mais invalide/expiré, ou rôle non autorisé (apprenant).
+          content:
+            application/json:
+              example:
+                message: "Token invalide"
+        '422':
+          description: "Erreur de validation (ex: prix négatif, titre manquant, level hors énumération)"
+          content:
+            application/json:
+              example:
+                message: "The price field must be at least 0."
+                errors:
+                  price:
+                    - "The price field must be at least 0."
+
+  /api/my-formations:
+    get:
+      summary: Récupérer les formations du formateur connecté
+      description: >
+        **Filtrage de sécurité :** cette route retourne exclusivement les formations dont le
+        `user_id` correspond à l'utilisateur authentifié via le token Bearer.
+      tags:
+        - Formations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Liste personnelle récupérée avec succès
+          content:
+            application/json:
+              example:
+                - id: 5
+                  title: "Maîtriser Laravel 11"
+                  description: "Création d'API REST robustes."
+                  price: 500.00
+                  duration: 20
+                  level: "intermediate"
+        '401':
+          description: Token JWT absent.
+        '403':
+          description: Token JWT présent mais invalide/expiré.
+
+  /api/formations/{id}:
+    put:
+      summary: Modifier une formation existante
+      description: Permet de mettre à jour les informations. Seul le formateur propriétaire peut modifier sa formation.
+      tags:
+        - Formations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FormationInput'
+      responses:
+        '200':
+          description: Mise à jour réussie
+          content:
+            application/json:
+              example:
+                message: "Formation mise à jour"
+                formation:
+                  id: 5
+                  title: "Maîtriser Laravel 11 (Mise à jour)"
+                  price: 450.00
+                  updated_at: "2026-03-06T10:30:00.000000Z"
+        '401':
+          description: Token JWT absent.
+        '403':
+          description: Token JWT invalide, ou formation appartenant à un autre formateur.
+        '404':
+          description: Formation introuvable.
+        '422':
+          description: Erreur de validation.
+
+    delete:
+      summary: Supprimer une formation
+      tags:
+        - Formations
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Supprimée avec succès
+        '401':
+          description: Token JWT absent.
+        '403':
+          description: Token JWT invalide, ou formation appartenant à un autre formateur.
+        '404':
+          description: Formation introuvable.
+
+  /api/formations/{id}/signalements:
+    post:
+      summary: Signaler un problème sur une formation
+      description: >
+        Permet à un utilisateur authentifié de signaler un problème sur une formation
+        (contenu inapproprié, erreur technique, autre). Nécessite le header
+        `Authorization: Bearer <token>`. Le `formation_id` provient exclusivement de
+        l'URL et le `user_id` est déduit du token JWT via `auth()->user()->id` :
+        aucun des deux n'est envoyé dans le corps de la requête. Un même utilisateur
+        ne peut signaler qu'une seule fois la même formation.
+      tags:
+        - Signalements
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la formation signalée.
+          schema:
+            type: integer
+          example: 2
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignalementInput'
+            example:
+              motif: "erreur_technique"
+              description: "le module 2 affiche une erreur 500 lors du chargement."
+      responses:
+        '201':
+          description: Signalement créé avec succès.
+          content:
+            application/json:
+              example:
+                message: "Signalement envoyé avec succès"
+                signalement:
+                  id: 3
+                  formation_id: 2
+                  user_id: 7
+                  motif: "erreur_technique"
+                  description: "le module 2 affiche une erreur 500 lors du chargement."
+                  statut: "en_attente"
+                  created_at: "2026-08-18T05:51:21.000000Z"
+                  updated_at: "2026-08-18T05:51:21.000000Z"
+        '401':
+          description: Token JWT absent.
+          content:
+            application/json:
+              example:
+                message: "Token absent"
+        '403':
+          description: Token JWT présent mais invalide/expiré.
+          content:
+            application/json:
+              example:
+                message: "Token invalide"
+        '404':
+          description: Formation introuvable.
+          content:
+            application/json:
+              example:
+                message: "Formation introuvable"
+        '422':
+          description: >
+            Erreur de validation (motif manquant ou hors énumération), ou
+            l'utilisateur a déjà signalé cette formation.
+          content:
+            application/json:
+              examples:
+                motif_manquant:
+                  summary: Motif requis
+                  value:
+                    message: "The motif field is required."
+                    errors:
+                      motif:
+                        - "The motif field is required."
+                deja_signale:
+                  summary: Formation déjà signalée par cet utilisateur
+                  value:
+                    message: "Vous avez déjà signalé cette formation"
+
+    get:
+      summary: Consulter les signalements reçus pour une formation
+      description: >
+        Retourne la liste des signalements reçus pour une formation. Nécessite le
+        header `Authorization: Bearer <token>`. Réservé au formateur propriétaire de
+        la formation : tout autre utilisateur authentifié (apprenant, ou formateur
+        non propriétaire) reçoit une erreur 403.
+      tags:
+        - Signalements
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Identifiant de la formation.
+          schema:
+            type: integer
+          example: 2
+      responses:
+        '200':
+          description: Liste des signalements récupérée avec succès.
+          content:
+            application/json:
+              example:
+                - id: 3
+                  formation_id: 2
+                  user_id: 7
+                  motif: "erreur_technique"
+                  description: "le module 2 affiche une erreur 500 lors du chargement."
+                  statut: "en_attente"
+                  created_at: "2026-08-18T05:51:21.000000Z"
+                  updated_at: "2026-08-18T05:51:21.000000Z"
+        '401':
+          description: Token JWT absent.
+          content:
+            application/json:
+              example:
+                message: "Token absent"
+        '403':
+          description: Token JWT invalide, ou formation appartenant à un autre formateur.
+          content:
+            application/json:
+              example:
+                message: "Action non autorisée"
+        '404':
+          description: Formation introuvable.
+          content:
+            application/json:
+              example:
+                message: "Formation introuvable"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    FormationInput:
+      type: object
+      required:
+        - title
+        - description
+        - price
+        - duration
+        - level
+      properties:
+        title:
+          type: string
+          example: "Maîtriser Laravel 11"
+        description:
+          type: string
+          example: "Apprendre à construire des backends modernes."
+        price:
+          type: number
+          format: float
+          example: 500.00
+        duration:
+          type: integer
+          description: Durée en heures.
+          example: 20
+        level:
+          type: string
+          enum: [beginner, intermediate, advanced]
+          example: "intermediate"
+        categorie:
+          type: string
+          example: "Back-end"
+        ville:
+          type: string
+          example: "Paris"
+    SignalementInput:
+      type: object
+      required:
+        - motif
+      properties:
+        motif:
+          type: string
+          enum: [contenu_inapproprie, erreur_technique, autre]
+          example: "erreur_technique"
+        description:
+          type: string
+          nullable: true
+          description: Détail libre du signalement (optionnel).
+          example: "le module 2 affiche une erreur 500 lors du chargement."

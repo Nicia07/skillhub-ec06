@@ -1,0 +1,38 @@
+# Laravel backend
+skillhub-back/vendor/
+skillhub-back/node_modules/
+skillhub-back/.env
+skillhub-back/.phpunit.result.cache
+skillhub-back/storage/*.key
+skillhub-back/storage/app/*
+!skillhub-back/storage/app/.gitkeep
+skillhub-back/storage/framework/cache/*
+!skillhub-back/storage/framework/cache/.gitkeep
+skillhub-back/storage/framework/sessions/*
+!skillhub-back/storage/framework/sessions/.gitkeep
+skillhub-back/storage/framework/testing/*
+!skillhub-back/storage/framework/testing/.gitkeep
+skillhub-back/storage/framework/views/*
+!skillhub-back/storage/framework/views/.gitkeep
+skillhub-back/storage/logs/*
+!skillhub-back/storage/logs/.gitkeep
+skillhub-back/bootstrap/cache/*
+!skillhub-back/bootstrap/cache/.gitignore
+skillhub-back/database/database.sqlite
+
+# React frontend
+Skillhub/node_modules/
+Skillhub/dist/
+Skillhub/.env
+
+# Spring Boot SSO microservice
+skillhub-sso/target/
+skillhub-sso/.mvn/wrapper/maven-wrapper.jar
+skillhub-sso/*.log
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
