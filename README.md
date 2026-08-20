@@ -92,13 +92,32 @@ hashé en BCrypt côté SSO) et renvoie un JWT ; **409** si l'email existe déj�
 > IPv6 (`::1`) de `localhost` n'aboutit pas et fait attendre le timeout complet
 > (5s) avant l'échec — voir `skillhub-back/.env.example`.
 
-## 3. Règle métier : limite de 5 inscriptions actives
+## 3. Règle métier : désinscription automatique après 30 jours d'inactivité
 
-`POST /api/inscriptions` (`InscriptionController::store`) compte désormais les
-inscriptions au statut `en cours` de l'apprenant avant de créer la nouvelle
-inscription. Au-delà de 5, l'API retourne **HTTP 400** avec un message
-explicite. Une formation marquée `terminée` libère une place. Voir
-`tests/Feature/InscriptionLimiteTest.php`.
+Un apprenant inactif depuis plus de 30 jours sur une formation qu'il suit est
+automatiquement désinscrit.
+
+- **Champ `last_activity_at`** (`DATETIME`, nullable) ajouté à la table
+  `inscriptions` (migration `add_last_activity_at_to_inscriptions_table`,
+  gardée par `Schema::hasColumn` pour rester idempotente si le champ existe déjà).
+- **Middleware `App\Http\Middleware\TouchInscriptionActivity`** (alias `touch.activity`) :
+  à chaque fois qu'un apprenant connecté consulte le détail d'une formation
+  qu'il suit (`GET /api/formations/{id}`), `last_activity_at` est mis à jour
+  sur son inscription correspondante.
+- **Commande Artisan `php artisan app:desinscription-inactivite`**
+  (`App\Console\Commands\DesinscriptionInactiviteCommand`) : parcourt les
+  inscriptions au statut `en cours` dont `last_activity_at` est `NULL` ou
+  antérieur à 30 jours, les supprime, puis affiche/loggue le nombre de
+  désinscriptions effectuées (`Log::info`, canal par défaut).
+- **Tests** : `tests/Feature/DesinscriptionInactiviteTest.php` couvre une
+  inscription inactive depuis 31 jours (désinscrite), une inscription active
+  depuis 5 jours (conservée), et une inscription sans activité enregistrée
+  (désinscrite).
+
+Pour exécuter la commande manuellement (ou via une tâche planifiée/cron) :
+```bash
+php artisan app:desinscription-inactivite
+```
 
 ## 4. Lancer le projet
 
