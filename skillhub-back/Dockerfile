@@ -1,4 +1,6 @@
-FROM php:8.3-apache
+# Doit matcher la version PHP utilisee pour generer composer.lock (8.4) :
+# des paquets Symfony verrouilles exigent PHP >=8.4.1.
+FROM php:8.4-apache
 
 # Extensions PHP requises par Laravel + le driver MySQL
 RUN apt-get update && apt-get install -y --no-install-recommends \

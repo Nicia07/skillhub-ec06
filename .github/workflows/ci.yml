@@ -25,7 +25,10 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.3"
+          # Doit matcher la version PHP locale utilisee pour generer composer.lock
+          # (8.4 ici) : composer verrouille des paquets Symfony 8.x qui exigent
+          # PHP >=8.4.1, donc un runner en 8.3 fait echouer "composer install".
+          php-version: "8.4"
           # Liste alignee sur `composer check-platform-reqs` (requis reels du
           # lock, notamment ext-sodium introduit par lcobucci/jwt v5 via
           # tymon/jwt-auth) plutot que de compter sur les extensions par
