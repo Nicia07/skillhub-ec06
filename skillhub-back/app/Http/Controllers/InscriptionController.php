@@ -14,6 +14,7 @@ class InscriptionController extends Controller
                 $inscription->formation->pseudo_formateur = $inscription->formation->formateur->pseudo ?? null;
                 $inscription->formation->unsetRelation('formateur');
             }
+
             return $inscription;
         });
     }
@@ -64,7 +65,7 @@ class InscriptionController extends Controller
     {
         $inscription = Inscription::find($id);
 
-        if (!$inscription) {
+        if (! $inscription) {
             return response()->json(['message' => 'Inscription introuvable'], 404);
         }
 
@@ -86,7 +87,7 @@ class InscriptionController extends Controller
     {
         $inscription = Inscription::find($id);
 
-        if (!$inscription) {
+        if (! $inscription) {
             return response()->json(['message' => 'Inscription introuvable'], 404);
         }
 

@@ -1,8 +1,14 @@
 <?php
 
+use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\SsoAuthenticate;
+use App\Http\Middleware\TouchInscriptionActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Http\Middleware\Authenticate;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,8 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Enregistrement de l'alias pour JWT
         $middleware->alias([
-            'jwt.verify' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
-            'role' => \App\Http\Middleware\EnsureRole::class,
+            'jwt.verify' => Authenticate::class,
+            'role' => EnsureRole::class,
+            'sso' => SsoAuthenticate::class,
+            'touch.activity' => TouchInscriptionActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -23,12 +31,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Distinguish "no token provided" (401) from "token present but invalid/expired" (403)
         // by inspecting the wrapped previous exception, since the middleware sets it only
         // when a JWTException (invalid/expired token) was actually caught.
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException $e, $request) {
-            if (!$request->is('api/*')) {
+        $exceptions->render(function (UnauthorizedHttpException $e, $request) {
+            if (! $request->is('api/*')) {
                 return null;
             }
 
-            if ($e->getPrevious() instanceof \Tymon\JWTAuth\Exceptions\JWTException) {
+            if ($e->getPrevious() instanceof JWTException) {
                 return response()->json(['message' => 'Token invalide'], 403);
             }
 

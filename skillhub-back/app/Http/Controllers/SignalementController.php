@@ -14,7 +14,7 @@ class SignalementController extends Controller
     {
         $formation = Formation::find($idFormation);
 
-        if (!$formation) {
+        if (! $formation) {
             return response()->json(['message' => 'Formation introuvable'], 404);
         }
 
@@ -31,7 +31,7 @@ class SignalementController extends Controller
     // le formation_id vient de l'URL, le user_id de l'utilisateur authentifié.
     public function store(Request $request, $idFormation)
     {
-        if (!Formation::where('id', $idFormation)->exists()) {
+        if (! Formation::where('id', $idFormation)->exists()) {
             return response()->json(['message' => 'Formation introuvable'], 404);
         }
 

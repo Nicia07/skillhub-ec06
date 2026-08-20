@@ -12,6 +12,7 @@ class FormationController extends Controller
         return $formations->map(function ($formation) {
             $formation->pseudo_formateur = $formation->formateur->pseudo ?? null;
             $formation->unsetRelation('formateur');
+
             return $formation;
         });
     }
@@ -29,7 +30,7 @@ class FormationController extends Controller
     {
         $formation = Formation::with('formateur:id,pseudo')->find($id);
 
-        if (!$formation) {
+        if (! $formation) {
             return response()->json(['message' => 'Formation introuvable'], 404);
         }
 
@@ -70,12 +71,11 @@ class FormationController extends Controller
         return response()->json(['message' => 'Formation créée avec succès', 'formation' => $formation], 201);
     }
 
-
     public function update(Request $request, $id)
     {
         $formation = Formation::find($id);
 
-        if (!$formation) {
+        if (! $formation) {
             return response()->json(['message' => 'Formation introuvable'], 404);
         }
 
@@ -98,12 +98,11 @@ class FormationController extends Controller
         return response()->json(['message' => 'Formation mise à jour', 'formation' => $formation], 200);
     }
 
-
     public function destroy($id)
     {
         $formation = Formation::find($id);
 
-        if (!$formation) {
+        if (! $formation) {
             return response()->json(['message' => 'Formation introuvable'], 404);
         }
 
