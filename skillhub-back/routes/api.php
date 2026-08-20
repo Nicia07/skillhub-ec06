@@ -17,7 +17,9 @@ Route::post('/register', [AuthController::class, 'register']);
 
 // Catalogue public : visible par tous, connectés ou non.
 Route::get('/formations', [FormationController::class, 'index']);
-Route::get('/formations/{id}', [FormationController::class, 'show']);
+// touch.activity : si un apprenant connecte accede a la formation, met a jour
+// last_activity_at sur son inscription (regle de desinscription apres 30 jours d'inactivite).
+Route::get('/formations/{id}', [FormationController::class, 'show'])->middleware('touch.activity');
 
 // --- AUTHENTIFICATION FORTE DÉLÉGUÉE AU MICROSERVICE SPRING BOOT SSO ---
 // Login : Laravel présente la Master Key au microservice et relaie le JWT émis.

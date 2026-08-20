@@ -13,6 +13,11 @@ class Inscription extends Model
         'id_apprenant',
         'id_formation',
         'status',
+        'last_activity_at',
+    ];
+
+    protected $casts = [
+        'last_activity_at' => 'datetime',
     ];
 
     /**
