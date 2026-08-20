@@ -26,7 +26,11 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: mbstring, pdo_sqlite, bcmath, zip, curl
+          # Liste alignee sur `composer check-platform-reqs` (requis reels du
+          # lock, notamment ext-sodium introduit par lcobucci/jwt v5 via
+          # tymon/jwt-auth) plutot que de compter sur les extensions par
+          # defaut du runner.
+          extensions: mbstring, pdo_sqlite, bcmath, zip, curl, ctype, dom, fileinfo, filter, hash, iconv, json, libxml, openssl, pcre, phar, session, sodium, tokenizer, xml, xmlwriter
           coverage: xdebug
 
       - name: Install dependencies (composer install)
